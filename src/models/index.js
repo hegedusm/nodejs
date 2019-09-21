@@ -1,2 +1,2 @@
-export { default as User } from "./Product";
-export { default as Product } from "./User";
+export { default as Product } from "./Product";
+export { default as User } from "./User";
