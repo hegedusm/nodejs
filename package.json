@@ -16,7 +16,10 @@
 		"type": "git",
 		"url": "git+https://github.com/hegedusm/nodejs.git"
 	},
-	"author": "hegedusm",
+	"author": {
+		"name": "hegedusm",
+		"email": "mate_hegedus@epam.com"
+	},
 	"license": "ISC",
 	"bugs": {
 		"url": "https://github.com/hegedusm/nodejs/issues"
