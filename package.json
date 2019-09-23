@@ -4,7 +4,9 @@
 	"description": "Global Mentoring Program",
 	"main": "src/app.js",
 	"scripts": {
-		"start": "nodemon --exec babel-node src/app.js",
+		"build": "babel src --out-dir dist --copy-files",
+		"start": "node dist/app.js",
+		"watch": "nodemon --exec babel-node src/app.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"babel": {
