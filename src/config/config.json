@@ -1,3 +1,5 @@
 {
-	"name": "Node.js Homework Application"
+	"name": "Node.js Homework Application",
+	"importPath": "data",
+	"importPeriod": 5000
 }
