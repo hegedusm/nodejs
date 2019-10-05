@@ -15,7 +15,7 @@ class DirWatcher extends EventEmmitter {
 
 		const directory = this.isValidPath(path);
 		console.log(`Started watching directory ${directory} for file changes every ${delay} ms`);
-		setInterval(() => this.checkAndNotifyDirectoryChange(directory), delay, directory);
+		setInterval(() => this.checkAndNotifyDirectoryChange(directory), delay);
 	}
 
 	isValidPath(path) {
