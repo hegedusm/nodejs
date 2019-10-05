@@ -6,5 +6,6 @@ import path from "path";
 
 var dataPath = path.join(__dirname, config.importPath);
 
-const watcher = new DirWatcher(dataPath, config.importPeriod);
-const importer = new Importer(watcher);
+const watcher = new DirWatcher(config.importPeriod);
+new Importer(watcher);
+watcher.watch(dataPath);

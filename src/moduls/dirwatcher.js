@@ -9,13 +9,16 @@ const stat = util.promisify(fs.stat);
 
 class DirWatcher extends EventEmmitter {
 
-	constructor(path, delay) {
+	constructor(delay) {
 		super();
 		this.fileMetadatas = {};
+		this.delay = delay;
+	}
 
+	watch(path) {
 		const directory = this.isValidPath(path);
-		console.log(`Started watching directory ${directory} for file changes every ${delay} ms`);
-		setInterval(() => this.checkAndNotifyDirectoryChange(directory), delay);
+		console.log(`Started watching directory ${directory} for file changes every ${this.delay} ms`);
+		setInterval(() => this.checkAndNotifyDirectoryChange(directory), this.delay);
 	}
 
 	isValidPath(path) {
