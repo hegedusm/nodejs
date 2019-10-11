@@ -8,7 +8,7 @@ class Importer {
 		eventEmitter.addListener("changed", changed => {
 			console.log(`Changes received ${changed}`);
 			changed.forEach(file => {
-				this.import(file).then(content => {console.log(`${file}: ${content ? content : "<empty file>"}`);});
+				this.import(file).then(content => console.log(`${file}: ${content ? content : "<empty file>"}`));
 			});
 		})
 	}
