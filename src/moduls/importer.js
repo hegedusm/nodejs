@@ -1,6 +1,6 @@
 import fs from "fs";
 import util from "util";
-import csv from "csvtojson";
+import csv from "csvjson";
 
 const readFile = util.promisify(fs.readFile);
 
@@ -9,23 +9,24 @@ class Importer {
 		eventEmitter.addListener("changed", changed => {
 			console.log(`Changes received ${changed}`);
 			changed.forEach(file => {
-				this.import(file).then(content =>  
-					csv({
-						noheader:true,
-						output: "csv"
-					}).fromString(content)
-					.then(csvRow => console.log(csvRow))
-				);
+				this.import(file).then(content => console.log(content));
+				//console.log(this.importSync(file));
 			});
 		})
 	}
 
 	async import(path) {
-		return await readFile(path, "utf8");
+		const content = await readFile(path, "utf8");
+		return this.convertContent(content);
 	}
 
 	importSync(path) {
-		return fs.readFileSync(path, "utf8");
+		const content = fs.readFileSync(path, "utf8");
+		return this.convertContent(content);
+	}
+
+	convertContent(content) {
+		return csv.toObject(content);
 	}
 }
 
