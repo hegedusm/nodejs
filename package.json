@@ -11,7 +11,15 @@
 	},
 	"babel": {
 		"presets": [
-			"@babel/preset-env"
+			[
+				"@babel/preset-env",
+				{
+					"targets": {
+						"node": "10"
+					}
+				}
+			],
+			"@babel/preset-react"
 		]
 	},
 	"repository": {
@@ -32,9 +40,12 @@
 		"@babel/core": "^7.6.0",
 		"@babel/node": "^7.6.1",
 		"@babel/preset-env": "^7.6.0",
+		"@babel/preset-react": "^7.0.0",
 		"@babel/preset-stage-2": "^7.0.0",
 		"@babel/register": "^7.6.0",
 		"nodemon": "^1.19.2"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"csvjson": "^5.1.0"
+	}
 }
