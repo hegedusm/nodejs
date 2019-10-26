@@ -23,7 +23,8 @@ const argv = yargs
 		description: 'Css bundler action parameter',
 		type: 'string'
 	})
-	.demandOption("action")
+	.help(false)
+	.showHelpOnFail(false)
 	.argv;
 
 /**
@@ -167,9 +168,15 @@ registerAction(convertFromFile, argv.file);
 registerAction(convertToFile, argv.file);
 registerAction(cssBundler, argv.path);
 
-if (actionRegistry[argv.action]) {
-	actionRegistry[argv.action]();
+
+if (process.argv[2] && (process.argv[2] == "-h" || process.argv[2] == "--help")) {
+	yargs.showHelp();
 }
 else {
-	console.error(`Unknown action ${argv.action}, valid actions are ${Object.keys(actionRegistry)}`);
+	if (actionRegistry[argv.action]) {
+		actionRegistry[argv.action]();
+	}
+	else {
+		console.error(`Unknown action ${argv.action}, valid actions are ${Object.keys(actionRegistry)}`);
+	}
 }
