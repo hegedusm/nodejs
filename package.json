@@ -46,6 +46,8 @@
 		"nodemon": "^1.19.2"
 	},
 	"dependencies": {
-		"csvjson": "^5.1.0"
+		"commander": "^3.0.2",
+		"csvjson": "^5.1.0",
+		"yargs": "^14.2.0"
 	}
 }
