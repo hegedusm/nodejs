@@ -1,6 +1,9 @@
 const yargs = require('yargs');
 const fs = require('fs');
 const util = require("util");
+const async = require("async");
+const path = require("path");
+var request = require('request');
 
 const actionRegistry = {};
 
@@ -13,6 +16,11 @@ const argv = yargs
 	.option('file', {
 		alias: "f",
 		description: 'Action parameter',
+		type: 'string'
+	})
+	.option('path', {
+		alias: "p",
+		description: 'Css bundler action parameter',
 		type: 'string'
 	})
 	.demandOption("action")
@@ -63,18 +71,75 @@ function convertToFile(filePath) {
 		console.error("Required parameter missing");
 		return;
 	}
-	const path = require("path");
+
 	const csv = require("csvjson");
 	const content = fs.readFileSync(filePath, "utf8");
 	const parsedPath = path.parse(filePath);
-	const targetPath = path.join(parsedPath.dir, parsedPath.name+".json");
-	
+	const targetPath = path.join(parsedPath.dir, parsedPath.name + ".json");
+
 	const outStream = fs.createWriteStream(targetPath)
 	outStream.write(JSON.stringify(csv.toObject(content)));
 }
 
-function registerAction(action) {
-	actionRegistry[action.name] = action;
+
+function cssBundler(directory) {
+	if (!fs.statSync(directory).isDirectory()) {
+		console.error("Required parameter missing");
+		return;
+	}
+	fs.readdir(directory, (err, files) => {
+		if (err) {
+			console.error(err);
+			return;
+		}
+		files = files
+			.filter(file => file.endsWith(".css"))
+			.filter(file => file !== "bundle.css")
+			.map(file => path.join(directory, file));
+		const targetcssPath = path.join(directory, "bundle.css");
+
+		async.map(files, fs.readFile, (err, results) => {
+			if (err) {
+				console.error(err);
+				return;
+			}
+
+			fs.writeFile(targetcssPath, results.join("\n"), (err) => {
+				if (err) {
+					console.error(err);
+					return;
+				}
+
+				var options = {
+					url: 'https://epam-my.sharepoint.com/personal/vitali_kozlov_epam_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fvitali%5Fkozlov%5Fepam%5Fcom%2FDocuments%2FNode%2Ejs%2FCDP%2FHomeworks%2F3%2E%20Command%20Line%2E%20Debugging%2E%20Errors%20handling%20%2D%20Filesystem%20and%20Streams%2Fnodejs%2Dhomework3%2Ecss&parent=%2Fpersonal%2Fvitali%5Fkozlov%5Fepam%5Fcom%2FDocuments%2FNode%2Ejs%2FCDP%2FHomeworks%2F3%2E%20Command%20Line%2E%20Debugging%2E%20Errors%20handling%20%2D%20Filesystem%20and%20Streams&originalPath=aHR0cHM6Ly9lcGFtLW15LnNoYXJlcG9pbnQuY29tLzp1Oi9wL3ZpdGFsaV9rb3psb3YvRWVZODlPbHRyMXBCcXBsZzUyTTUwN0lCNXlxYUhpRDcxdzB4czJzM0hSaWhwQT9ydGltZT1iLXNHbnZKWjEwZw'
+				};
+
+				request.get(options, function (error, response, body) {
+					if (error) {
+						console.error(error);
+					}
+					let httpRespAppend = ""
+					if (response.statusCode === 200) {
+						httpRespAppend = body;
+					} else {
+						httpRespAppend = ".missingHttp{}"
+					}
+					fs.appendFile(targetcssPath, httpRespAppend, (err) => {
+						if (err) {
+							console.error(err);
+						}
+					});
+				});
+			});
+
+		});
+	});
+
+}
+
+
+function registerAction(action, parameter) {
+	actionRegistry[action.name] = () => action(parameter);
 }
 
 function inputTransform(prompt, transformer) {
@@ -97,12 +162,13 @@ function inputTransform(prompt, transformer) {
 
 registerAction(reverse);
 registerAction(transform);
-registerAction(outputFile);
-registerAction(convertFromFile);
-registerAction(convertToFile);
+registerAction(outputFile, argv.file);
+registerAction(convertFromFile, argv.file);
+registerAction(convertToFile, argv.file);
+registerAction(cssBundler, argv.path);
 
 if (actionRegistry[argv.action]) {
-	actionRegistry[argv.action](argv.file);
+	actionRegistry[argv.action]();
 }
 else {
 	console.error(`Unknown action ${argv.action}, valid actions are ${Object.keys(actionRegistry)}`);
