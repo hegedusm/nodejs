@@ -171,5 +171,6 @@ else {
 	}
 	else {
 		console.error(`Unknown action ${argv.action}, valid actions are ${Object.keys(actionRegistry)}`);
+		yargs.showHelp();
 	}
 }
