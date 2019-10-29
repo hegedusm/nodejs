@@ -3,7 +3,6 @@ const fs = require('fs');
 const util = require("util");
 const async = require("async");
 const path = require("path");
-var request = require('request');
 
 const actionRegistry = {};
 
@@ -30,14 +29,16 @@ const argv = yargs
 /**
  * Opens prompt and writes back reversed string from input
  */
-function reverse() {
-	inputTransform("reverse", line => line.split('').reverse().join(''));
+function reverse(commandLineInput) {
+	inputTransform("reverse", line => line.split('').reverse().join(''), commandLineInput);
 }
 
 /**
  * Opens prompt and writes back upper cased string from input
  */
-function transform() { inputTransform("transform", line => line.toUpperCase()); }
+function transform(commandLineInput) {
+	inputTransform("transform", line => line.toUpperCase(), commandLineInput);
+}
 
 /**
  * Writes file content to stdout
@@ -97,6 +98,12 @@ function cssBundler(directory) {
 			.filter(file => file.endsWith(".css"))
 			.filter(file => file !== "bundle.css")
 			.map(file => path.join(directory, file));
+		//append required file to the end
+		var homeworkCss = path.join(__dirname, "/data/nodejs-homework3.css");
+		files.push(homeworkCss)
+
+		console.log(`Bundling css files: ${files}`);
+
 		const targetcssPath = path.join(directory, "bundle.css");
 
 		async.map(files, fs.readFile, (err, results) => {
@@ -110,27 +117,6 @@ function cssBundler(directory) {
 					console.error(err);
 					return;
 				}
-
-				var options = {
-					url: 'https://epam-my.sharepoint.com/personal/vitali_kozlov_epam_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fvitali%5Fkozlov%5Fepam%5Fcom%2FDocuments%2FNode%2Ejs%2FCDP%2FHomeworks%2F3%2E%20Command%20Line%2E%20Debugging%2E%20Errors%20handling%20%2D%20Filesystem%20and%20Streams%2Fnodejs%2Dhomework3%2Ecss&parent=%2Fpersonal%2Fvitali%5Fkozlov%5Fepam%5Fcom%2FDocuments%2FNode%2Ejs%2FCDP%2FHomeworks%2F3%2E%20Command%20Line%2E%20Debugging%2E%20Errors%20handling%20%2D%20Filesystem%20and%20Streams&originalPath=aHR0cHM6Ly9lcGFtLW15LnNoYXJlcG9pbnQuY29tLzp1Oi9wL3ZpdGFsaV9rb3psb3YvRWVZODlPbHRyMXBCcXBsZzUyTTUwN0lCNXlxYUhpRDcxdzB4czJzM0hSaWhwQT9ydGltZT1iLXNHbnZKWjEwZw'
-				};
-
-				request.get(options, function (error, response, body) {
-					if (error) {
-						console.error(error);
-					}
-					let httpRespAppend = ""
-					if (response.statusCode === 200) {
-						httpRespAppend = body;
-					} else {
-						httpRespAppend = ".missingHttp{}"
-					}
-					fs.appendFile(targetcssPath, httpRespAppend, (err) => {
-						if (err) {
-							console.error(err);
-						}
-					});
-				});
 			});
 
 		});
@@ -143,26 +129,33 @@ function registerAction(action, parameter) {
 	actionRegistry[action.name] = () => action(parameter);
 }
 
-function inputTransform(prompt, transformer) {
-	var readline = require('readline');
-	var rl = readline.createInterface(process.stdin, process.stdout);
-	rl.setPrompt(`${prompt}> `);
-	rl.prompt();
-	rl.on('line', function (line) {
-		if (line == "exit") {
-			console.log("bye");
-			rl.close();
-		}
-		console.log(transformer(line));
+/**
+ * Writes defined input, or in it's absence a dynamic promp input to process std through a transformer function
+ */
+function inputTransform(prompt, transformer, definedInput) {
+	if (definedInput) {
+		process.stdout.write(transformer(definedInput));
+	}
+	else {
+		var readline = require('readline');
+		var rl = readline.createInterface(process.stdin, process.stdout);
+		rl.setPrompt(`${prompt}> `);
 		rl.prompt();
-	}).on('close', function () {
-		process.exit(0);
-	});
+		rl.on('line', function (line) {
+			if (line == "exit") {
+				console.log("bye");
+				rl.close();
+			}
+			console.log(transformer(line));
+			rl.prompt();
+		}).on('close', function () {
+			process.exit(0);
+		});
+	}
 }
 
-
-registerAction(reverse);
-registerAction(transform);
+registerAction(reverse, argv._[0]);
+registerAction(transform, argv._[0]);
 registerAction(outputFile, argv.file);
 registerAction(convertFromFile, argv.file);
 registerAction(convertToFile, argv.file);

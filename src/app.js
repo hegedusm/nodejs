@@ -1,6 +1,6 @@
 import config from "./config/config";
-import DirWatcher from "./moduls/dirwatcher";
-import Importer from "./moduls/importer";
+import DirWatcher from "./modules/dirwatcher";
+import Importer from "./modules/importer";
 import path from "path";
 
 
