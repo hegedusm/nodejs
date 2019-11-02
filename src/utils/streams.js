@@ -81,6 +81,7 @@ function convertToFile(filePath) {
 
 	const outStream = fs.createWriteStream(targetPath)
 	outStream.write(JSON.stringify(csv.toObject(content)));
+	outStream.end();
 }
 
 
