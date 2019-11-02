@@ -45,7 +45,7 @@ function transform(commandLineInput) {
  */
 function outputFile(filePath) {
 	if (!fs.statSync(filePath).isFile()) {
-		console.error("Required parameter missing");
+		console.error("Output file requries valid file to work with");
 		return;
 	}
 
@@ -57,7 +57,7 @@ function outputFile(filePath) {
  */
 function convertFromFile(filePath) {
 	if (!fs.statSync(filePath).isFile()) {
-		console.error("Required parameter missing");
+		console.error("Convert from file requries valid file to work with");
 		return;
 	}
 	const csv = require("csvjson");
@@ -70,7 +70,7 @@ function convertFromFile(filePath) {
  */
 function convertToFile(filePath) {
 	if (!fs.statSync(filePath).isFile()) {
-		console.error("Required parameter missing");
+		console.error("Convert to file requries valid file to work with");
 		return;
 	}
 
@@ -87,7 +87,7 @@ function convertToFile(filePath) {
 
 function cssBundler(directory) {
 	if (!fs.statSync(directory).isDirectory()) {
-		console.error("Required parameter missing");
+		console.error("Css bundler requires valid directory to work with");
 		return;
 	}
 	fs.readdir(directory, (err, files) => {
