@@ -1,5 +1,6 @@
 import express from 'express';
-import product from "../controllers/product/product";
+import product from "../controllers/product";
+import users from "../controllers/users";
 
 const routes  = express.Router();
 
@@ -13,7 +14,9 @@ routes.get("/api/products/:id", product.get);
 routes.get("/api/products/:id/reviews", product.getReviews);
 routes.post("/api/products", product.addProduct);
 
+routes.get("/api/users", users.list);
+
 routes.use(function(req, res) {
-  response.sendNotFound(res);
+	res.sendStatus(404);
 });
 module.exports = routes;
