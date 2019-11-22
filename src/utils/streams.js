@@ -1,8 +1,10 @@
 const yargs = require('yargs');
 const fs = require('fs');
 const util = require("util");
-const async = require("async");
 const path = require("path");
+const CombinedStream = require('combined-stream');
+
+const readdir = util.promisify(fs.readdir);
 
 const actionRegistry = {};
 
@@ -85,49 +87,46 @@ function convertToFile(filePath) {
 }
 
 
-function cssBundler(directory) {
+async function cssBundler(directory) {
 	if (!fs.statSync(directory).isDirectory()) {
 		console.error("Css bundler requires valid directory to work with");
 		return;
 	}
-	fs.readdir(directory, (err, files) => {
-		if (err) {
-			console.error(err);
-			return;
-		}
-		files = files
-			.filter(file => file.endsWith(".css"))
-			.filter(file => file !== "bundle.css")
-			.map(file => path.join(directory, file));
-		//append required file to the end
-		var homeworkCss = path.join(__dirname, "/data/nodejs-homework3.css");
-		files.push(homeworkCss)
+	var files = await readdir(directory);
 
-		console.log(`Bundling css files: ${files}`);
+	files = files
+		.filter(file => file.endsWith(".css"))
+		.filter(file => file !== "bundle.css")
+		.map(file => path.join(directory, file));
+	//append required file to the end
+	var homeworkCss = path.join(__dirname, "/data/nodejs-homework3.css");
+	files.push(homeworkCss)
 
-		const targetcssPath = path.join(directory, "bundle.css");
+	console.log(`Bundling css files: ${files}`);
 
-		async.map(files, fs.readFile, (err, results) => {
-			if (err) {
-				console.error(err);
-				return;
-			}
+	const targetcssPath = path.join(directory, "bundle.css");
 
-			fs.writeFile(targetcssPath, results.join("\n"), (err) => {
-				if (err) {
-					console.error(err);
-					return;
-				}
-			});
+	const outStream = fs.createWriteStream(targetcssPath);
+	streamFilesInto(outStream, files);
+}
 
-		});
-	});
-
+function streamFilesInto(outStream, files) {
+	if (files.length === 0) {
+		outStream.end();
+		return;
+	}
+	var combinedStream = CombinedStream.create();
+	files.map(file => fs.createReadStream(file)).forEach(stream => combinedStream.append(stream));	
+	combinedStream.pipe(outStream);
 }
 
 
 function registerAction(action, parameter) {
 	actionRegistry[action.name] = () => action(parameter);
+}
+
+function registerAsyncAction(action, parameter) {
+	actionRegistry[action.name] = async () => await action(parameter);
 }
 
 /**
@@ -160,7 +159,7 @@ registerAction(transform, argv._[0]);
 registerAction(outputFile, argv.file);
 registerAction(convertFromFile, argv.file);
 registerAction(convertToFile, argv.file);
-registerAction(cssBundler, argv.path);
+registerAsyncAction(cssBundler, argv.path);
 
 
 if (process.argv[2] && (process.argv[2] == "-h" || process.argv[2] == "--help")) {
@@ -168,7 +167,12 @@ if (process.argv[2] && (process.argv[2] == "-h" || process.argv[2] == "--help"))
 }
 else {
 	if (actionRegistry[argv.action]) {
-		actionRegistry[argv.action]();
+		var promise = actionRegistry[argv.action]();
+		if(promise) {
+			promise.then(() => {
+				console.log(`Action ${argv.action} finished`);
+			});
+		}
 	}
 	else {
 		console.error(`Unknown action ${argv.action}, valid actions are ${Object.keys(actionRegistry)}`);
