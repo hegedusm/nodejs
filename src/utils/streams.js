@@ -106,18 +106,19 @@ async function cssBundler(directory) {
 
 	const targetcssPath = path.join(directory, "bundle.css");
 
-	const outStream = fs.createWriteStream(targetcssPath);
-	streamFilesInto(outStream, files);
+	await streamFilesInto(targetcssPath, files);
 }
 
-function streamFilesInto(outStream, files) {
+async function streamFilesInto(outFile, files) {
+	const filesCopy = [...files];
 	if (files.length === 0) {
-		outStream.end();
-		return;
+		return Promise.resolve();
 	}
-	var combinedStream = CombinedStream.create();
-	files.map(file => fs.createReadStream(file)).forEach(stream => combinedStream.append(stream));	
-	combinedStream.pipe(outStream);
+	const fileName = filesCopy.shift();
+	const stream = fs.createReadStream(fileName);
+	const outStream = fs.createWriteStream(outFile, {flags:'a'});
+	await new Promise(fulfill => { stream.pipe(outStream).on("finish", () => { console.log("done with "+fileName); fulfill(); }); });
+	await streamFilesInto(outFile, filesCopy);
 }
 
 
