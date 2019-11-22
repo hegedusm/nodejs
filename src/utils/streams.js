@@ -2,7 +2,6 @@ const yargs = require('yargs');
 const fs = require('fs');
 const util = require("util");
 const path = require("path");
-const CombinedStream = require('combined-stream');
 
 const readdir = util.promisify(fs.readdir);
 
