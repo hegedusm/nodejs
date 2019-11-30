@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Product.associate = function(models) {
 	Product.hasMany(models.Review, {
-		as: 'products'
+		as: 'reviews'
 	  });
   };
   return Product;
