@@ -51,6 +51,10 @@
 		"combined-stream": "^1.0.8",
 		"csvjson": "^5.1.0",
 		"express": "^4.17.1",
+		"jsonwebtoken": "^8.5.1",
+		"passport": "^0.4.0",
+		"passport-github": "^1.1.0",
+		"passport-local": "^1.0.0",
 		"yargs": "^14.2.0"
 	}
 }
