@@ -1,57 +1,41 @@
-import db from "../database/models";
+import { Products } from "../database/mongo/mongoose";
+
+let lastId = 1;
 
 exports.list = (req, resp) => {
-	db.Product.findAll({raw:true}).then(products => resp.json(products));
+	Products.find({}, (err, products) => {
+		resp.json(products);
+	});
 }
 
 exports.get = (req, resp) => {
 	const productId = req.params.id;
-	db.Product.findByPk(productId).then(product => {
-		if (!product) {
-			resp.sendStatus(404);
-		}
-		else {
-			resp.json(product);
-		}
+	Products.findOne({ id: productId }, (err, product) => {
+		resp.json(product);
 	});
-	
 }
 
 exports.getReviews = (req, resp) => {
 	const productId = req.params.id;
-	db.Review.findAll({attributes: ['text'], where: { productId: productId } }).then(reviews => {
-		if (!reviews) {
-			resp.sendStatus(404);
-		}
-		else {
-			resp.json(reviews);
-		}
+	Products.findOne({ id: productId }, (err, product) => {
+		resp.json(product.reviews);
 	});
 }
 
 exports.addProduct = (req, resp) => {
 	const product = req.body;
-	db.sequelize.transaction((t) => {
-		return db.Product.create(
-			{
-				name: product.name,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			  }, {transaction: t}
-		).then(createdProduct => {
-			if(product.reviews) {
-				return Promise.all(product.reviews.map(review => {
-					db.Review.create({
-						text: review, 
-						productId: createdProduct.id,
-						createdAt: new Date(),
-						updatedAt: new Date() }, {transaction: t})
-				}));
-			}
-		})
-	}).then(result => {
-		console.log("ok");
-		resp.sendStatus(200)
+	product.id = ++lastId;
+	new Products(product).save(product, (err, p) => {
+		if (err) { console.log(err); resp.sendStatus(500); }
+		else resp.sendStatus(200);
 	});
-	
+}
+
+exports.delete = (req, resp) => {
+	const productId = req.params.id;
+	Products.deleteOne({ id: productId }, (err, res) => {
+		if (err) resp.sendStatus(500);
+		else if (res.deletedCount) resp.sendStatus(200);
+		else resp.sendStatus(404);
+	});
 }

@@ -1,0 +1,24 @@
+{
+	"data": [
+		{
+			"name": "Brest",
+			"country": "Belarus",
+			"capital": false,
+			"location": {
+				"lat": 52.097621,
+				"long": 23.734050
+			},
+			"id": 1
+		},
+		{
+			"name": "Szeged",
+			"country": "Hungary",
+			"capital": false,
+			"location": {
+				"lat": 52.0,
+				"long": 23.0
+			},
+			"id": 2
+		}
+	]
+}
