@@ -2,8 +2,8 @@ import { Users } from "../database/mongo/mongoose";
 
 exports.list = (req, resp) => {
 	Users.find({}, (err, users) => {
-		if (err) throw err;
-		resp.json(users.map(user => user.userName));
+		if (err) resp.sendStatus(500);
+		else resp.json(users.map(user => user.userName));
 	});
 }
 

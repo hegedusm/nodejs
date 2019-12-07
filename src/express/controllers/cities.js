@@ -3,32 +3,29 @@ import { Cities } from "../database/mongo/mongoose";
 
 exports.getOne = (req, resp) => {
 	cities.collection.find().toArray((err, cities) => {
-		if (err)
-			throw err;
-
-		console.log(cities);
-		resp.json(cities[Math.floor(Math.random() * cities.length)]);
+		if (err) resp.sendStatus(500);
+		else resp.json(cities[Math.floor(Math.random() * cities.length)]);
 	});
 }
 
 exports.getOneMongoose = (req, resp) => {
 	Cities.find({}, (err, cities) => {
-		if (err) throw err;
-		resp.json(cities[Math.floor(Math.random() * cities.length)]);
+		if (err) resp.sendStatus(500);
+		else resp.json(cities[Math.floor(Math.random() * cities.length)]);
 	})
 }
 
 exports.findAll = (req, resp) => {
 	Cities.find({}, (err, cities) => {
-		if (err) throw err;
-		resp.json(cities);
+		if (err) resp.sendStatus(500);
+		else resp.json(cities);
 	});
 }
 
 exports.add = (req, resp) => {
 	const city = req.body;
 	new Cities(city).save((err, c) => {
-		if (err) { console.log(err); resp.sendStatus(500); }
+		if (err) resp.sendStatus(500);
 		else resp.sendStatus(200);
 	});
 }
@@ -38,8 +35,8 @@ exports.upsert = (req, resp) => {
 	const city = req.body;
 	city.id = id;
 	Cities.findOneAndUpdate({ id: id }, city, { upsert: true }, (err, cities) => {
-		if (err) throw err;
-		resp.sendStatus(200);
+		if (err) resp.sendStatus(500);
+		else resp.sendStatus(200);
 	});
 }
 

@@ -4,21 +4,24 @@ let lastId = 1;
 
 exports.list = (req, resp) => {
 	Products.find({}, (err, products) => {
-		resp.json(products);
+		if (err) resp.sendStatus(500);
+		else resp.json(products);
 	});
 }
 
 exports.get = (req, resp) => {
 	const productId = req.params.id;
 	Products.findOne({ id: productId }, (err, product) => {
-		resp.json(product);
+		if (err) resp.sendStatus(500);
+		else resp.json(product);
 	});
 }
 
 exports.getReviews = (req, resp) => {
 	const productId = req.params.id;
 	Products.findOne({ id: productId }, (err, product) => {
-		resp.json(product.reviews);
+		if (err) resp.sendStatus(500);
+		else resp.json(product.reviews);
 	});
 }
 
@@ -26,7 +29,7 @@ exports.addProduct = (req, resp) => {
 	const product = req.body;
 	product.id = ++lastId;
 	new Products(product).save(product, (err, p) => {
-		if (err) { console.log(err); resp.sendStatus(500); }
+		if (err) resp.sendStatus(500);
 		else resp.sendStatus(200);
 	});
 }
