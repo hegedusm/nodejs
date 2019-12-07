@@ -4,14 +4,16 @@ import { Cities } from "../database/mongo/mongoose";
 exports.getOne = (req, resp) => {
 	cities.collection.find().toArray((err, cities) => {
 		if (err) resp.sendStatus(500);
-		else resp.json(cities[Math.floor(Math.random() * cities.length)]);
+		if(cities.length > 0) resp.json(cities[Math.floor(Math.random() * cities.length)]);
+		else resp.sendStatus(404);
 	});
 }
 
 exports.getOneMongoose = (req, resp) => {
 	Cities.find({}, (err, cities) => {
 		if (err) resp.sendStatus(500);
-		else resp.json(cities[Math.floor(Math.random() * cities.length)]);
+		if(cities.length > 0)  resp.json(cities[Math.floor(Math.random() * cities.length)]);
+		else resp.sendStatus(404);
 	})
 }
 
