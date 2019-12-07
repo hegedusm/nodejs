@@ -13,7 +13,8 @@ exports.get = (req, resp) => {
 	const productId = req.params.id;
 	Products.findOne({ id: productId }, (err, product) => {
 		if (err) resp.sendStatus(500);
-		else resp.json(product);
+		if(product) resp.json(product);
+		else resp.sendStatus(404);
 	});
 }
 
@@ -21,7 +22,8 @@ exports.getReviews = (req, resp) => {
 	const productId = req.params.id;
 	Products.findOne({ id: productId }, (err, product) => {
 		if (err) resp.sendStatus(500);
-		else resp.json(product.reviews);
+		if(product) resp.json(product.reviews);
+		else resp.sendStatus(404);
 	});
 }
 
